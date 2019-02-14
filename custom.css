@@ -1,0 +1,32 @@
+.remark-slide-content {
+	font-family: 'Yanone Kaffeesatz', sans-serif;
+	font-size: 25px;
+}
+
+li {
+	margin-top: 0.5em;
+}
+
+.title-slide .remark-slide-number {
+	display: none;
+}
+
+.references-slide p {
+	font-size: 16px;
+	margin: 0.25em 0em 0.25em 1em;
+	text-indent: -1em;
+}
+
+.logos {
+	position: absolute;
+	left: 50px;
+	bottom: 50px;
+	right: 50px;
+	display: flex;
+	justify-content: space-between;
+}
+
+.logos img {
+	background: #ffffff !important;
+	height: 80px;
+}

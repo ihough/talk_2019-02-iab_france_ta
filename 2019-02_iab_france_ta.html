@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>A multi-resolution daily air temperature model for France from MODIS and Landsat thermal data</title>
+    <meta charset="utf-8">
+    <meta name="author" content="Ian Hough" />
+    <meta name="date" content="2019-02-15" />
+    <link href="libs/remark-css-0.0.1/default.css" rel="stylesheet" />
+    <link href="libs/remark-css-0.0.1/default-fonts.css" rel="stylesheet" />
+    <link rel="stylesheet" href="custom.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: center, middle, inverse, title-slide
+
+# A multi-resolution daily air temperature model for France from MODIS and Landsat thermal data
+### Ian Hough
+### 2019-02-15
+
+---
+
+
+# Climate change, air pollution, and perinatal health
+
+### Ian Hough
+
+.pull-left[
+### Dr. Johanna Lepeule
+
+Institute for Advanced Biosciences
+
+University Grenoble Alpes
+]
+
+.pull-right[
+### Dr. Itai Kloog
+
+Department of Geography and Environmental Development
+
+Ben Gurion University of the Negev
+]
+
+.logos[![uga-logo](img/uga.png) ![iab-logo](img/iab_coul.png) ![bgu-logo](img/bgu.png)]
+
+---
+background-image: url(/img/outline-black.png)
+
+
+
+---
+
+# Adverse birth outcomes
+
+### Preterm birth (&lt;37 weeks gestation)
+
+* 11% of all births and increasing (Harrison, et al., 2016)
+* Leading cause of child mortality (Liu, et al., 2016)
+* Sequalae in childhood and adulthood (McCormick, et al., 2011)
+  - Asthma, cerebral palsy, behavioural problems, etc.
+
+### Term low birth weight (&lt;2500 g)
+
+* Increased morbidity and mortality in childhood &amp; adulthood (Barker, 2004; Belbasis, et al., 2016)
+
+---
+
+# Ambient temperature (T&lt;sub&gt;a&lt;/sub&gt;) and health
+
+* Heat, cold, or variable T&lt;sub&gt;a&lt;/sub&gt; can increase risk (Zhang, et al., 2017)
+
+* Response may depend on local population &amp; climate
+
+* Hard to synthesize findings
+
+|           | Preterm birth     | Birth weight      | Term low birth weight |
+|-----------|-------------------|-------------------|-----------------------|
+| Exposure  | Cold (&lt;10th %ile) | IQR Ta increase   | Heat (&gt;95th %ile)     |
+| Window    | Weeks 1–7         | Last 30 days      | Trimester 3           |
+| Statistic | Relative risk     | Decrease          | Odds ratio            |
+| Effect    | 1.09 [1.04–1.15]  | 16.6 g [5.9–27.4] | 1.31 [1.15–1.49]      |
+| Reference | Ha, et al. (2017) | Kloog, et al. (2015) | Ha, et al. (2017) |
+
+---
+class: inverse center middle
+
+# How do we estimate T&lt;sub&gt;a&lt;/sub&gt; exposure?
+
+---
+background-image: url(/img/map_stations.jpg)
+background-size: contain
+class: inverse
+
+---
+background-image: url(/img/map_stations_zoom.jpg)
+background-size: contain
+class: inverse
+
+---
+
+# Exposure error
+
+* ### Sparse monitoring networks
+* ### Coarse gridded meteorological data
+
+### &amp;rarr; May bias effect estimates towards null
+
+---
+
+# Our T&lt;sub&gt;a&lt;/sub&gt; model
+
+* ### Daily minimum, maximum, and mean T&lt;sub&gt;a&lt;/sub&gt; 2000 - 2016
+* ### 1 x 1 km&lt;sup&gt;2&lt;/sup&gt; for continental France
+* ### 200 x 200 m&lt;sup&gt;2&lt;/sup&gt; for large urban areas
+
+&lt;br&gt;
+
+Extension of (Kloog, et al., 2017) (daily 1 km mean T&lt;sub&gt;a&lt;/sub&gt; 2000 - 2011)
+
+---
+
+# Model components
+
+### 1. Spatiotemporal and spatial predictors
+
+* Land Surface Temperature (LST), elevation, etc.
+
+### 2. Linear mixed model
+
+* T&lt;sub&gt;a&lt;/sub&gt; ~ LST with daily varying slope
+
+### 3. Gapfilling
+
+* T&lt;sub&gt;pred&lt;/sub&gt; ~ T&lt;sub&gt;a&lt;/sub&gt; at nearby stations
+
+### 4. Local interpolation of residuals
+
+* High spatial resolution predictors + machine learning ensemble
+
+---
+
+# Satellite data
+
+### MODIS (1 km)
+
+* Land Surface Temperature (LST)
+  * Terra: 10:30 / 22:30 (day / night)
+  * Aqua: 13:30 / 01:30 (day / night)
+* NDVI
+  * Monthly composite
+
+### Landsat 5 / 7 / 8 (30 m)
+
+* Top-of-atmosphere brightness temperature (T&lt;sub&gt;B&lt;/sub&gt;)
+* NDVI
+* &amp;uarr; composited by month across 2000 - 2016
+
+---
+
+# Spatial predictors
+
+* ### Elevation
+* ### Land cover
+* ### Population
+* ### Climatic regions
+
+&amp;uarr; Aggregated to 1 km and 200 m grids
+
+---
+
+# Stage 1: linear mixed model (1 km)
+
+!["Stage 1"](img/stage1.png)
+
+`$$T_a = (\alpha + \mu_{jr}) + (\beta_1 + \nu_{jr}) \cdot LST + \beta_2 \cdot Emissivity + \\
+\; \; \; \; \; \; \; \; \beta_3 \cdot NDVI + \beta_4 \cdot Elevation + \beta_5 \cdot Population + \\
+\; \; \; \; \; \; \; \; \beta_6 \cdot Land Cover + e$$`
+
+*j* = day &amp;nbsp; *r* = climatic region &amp;nbsp; *e* = error
+
+
+---
+
+# Stage 2: Gapfilling
+
+!["Stage 2"](img/stage2.png)
+
+`$$T_{pred} = (\alpha + \mu_{ip}) + (\beta_1 + \nu_{ip}) \cdot T_{IDW} + e$$`
+
+*i* = grid cell
+
+*p* = two-month period
+
+*T&lt;sub&gt;IDW&lt;/sub&gt;* = inverse distance weighted T&lt;sub&gt;a&lt;/sub&gt;
+
+---
+background-image: url(/img/map_ta_1km.jpg)
+background-size: contain
+class: inverse
+
+---
+
+# 1 km model performance
+
+### Cross-validated 1 km predictions (calibration stage)
+
+| 2000-2016          | R2   | RMSE | MAE | Spatial R2 | Spatial RMSE | Temporal R2 | Temporal RMSE |
+|--------------------|------|------|-----|------------|--------------|-------------|---------------|
+| T&lt;sub&gt;a&lt;/sub&gt; min  | 0.92 |  1.9 | 1.4 |       0.89 |          1.1 |        0.94 |           1.6 |
+| T&lt;sub&gt;a&lt;/sub&gt; mean | 0.97 |  1.3 | 0.9 |       0.95 |          0.8 |        0.97 |           1.2 |
+| T&lt;sub&gt;a&lt;/sub&gt; max  | 0.95 |  1.8 | 1.4 |       0.88 |          1.2 |        0.96 |           1.5 |
+
+### Previous model (Kloog, et al., 2017)
+
+| 2000-2011          | R2   | RMSE | MAE | Spatial R2 | Spatial RMSE | Temporal R2 | Temporal RMSE |
+|--------------------|------|------|-----|------------|--------------|-------------|---------------|
+| T&lt;sub&gt;a&lt;/sub&gt; mean | 0.95 |  1.5 |   * |       0.91 |         0.65 |        0.96 |             * |
+
+\* = not reported
+
+---
+background-image: url(/img/map_stations_zoom.jpg)
+background-size: contain
+class: inverse
+
+---
+background-image: url(/img/map_ta_1km_zoom.jpg)
+background-size: contain
+class: inverse
+
+---
+
+# Stage 3: Residual interpolation (200 m)
+
+### Contiguous urban areas with &gt; 50,000 inhabitants
+
+### Random forest and XGBoost models
+
+`$$R \sim T_{pred},\ T_{B},\ NDVI,\ Elevation,\ Population,\\Land Cover,\ lat,\ lon,\ day$$`
+
+### GAM ensemble
+
+* Weights vary by location and predicted residual
+
+---
+background-image: url(/img/map_ta_1km_zoom.jpg)
+background-size: contain
+class: inverse
+
+---
+background-image: url(/img/map_ta_200m.jpg)
+background-size: contain
+class: inverse
+
+---
+
+# 200 m model performance
+
+### Cross-validated 200 m ensemble predictions (residual scale)
+
+| 2000-2016        | R2   | RMSE | MAE  | Spatial R2 | Spatial RMSE | Temporal R2 | Temporal RMSE |
+|------------------|------|------|------|------------|--------------|-------------|---------------|
+| R&lt;sub&gt;min&lt;/sub&gt;  | 0.79 |  0.6 |  0.4 |        1.0 |         0.05 |        0.66 |           0.6 |
+| R&lt;sub&gt;mean&lt;/sub&gt; | 0.89 |  0.4 |  0.3 |        1.0 |         0.04 |        0.87 |           0.4 |
+| R&lt;sub&gt;max&lt;/sub&gt;  | 0.85 |  0.5 |  0.3 |        1.0 |         0.03 |        0.73 |           0.5 |
+
+---
+
+# Next steps
+
+### Fine particulate matter models (PM&lt;sub&gt;10&lt;/sub&gt; &amp; PM&lt;sub&gt;2.5&lt;/sub&gt;)
+
+* Similar to T&lt;sub&gt;a&lt;/sub&gt; model
+* MODIS aerosol optical depth (AOD)
+
+### Birth outcomes study
+
+* EDEN, PELAGIE, SEPAGES
+* Birth weight and preterm birth
+* T&lt;sub&gt;a&lt;/sub&gt;, PM, and interaction
+
+---
+class: inverse bottom center
+
+# Thanks!
+
+&lt;br&gt;&lt;br&gt;&lt;br&gt;&lt;br&gt;
+
+.left[
+### Ian Hough
+### ian.hough@univ-grenoble-alpes.fr
+]
+
+---
+class: inverse references-slide
+
+# References
+
+Barker, D. J. P. (2004). "The Developmental Origins of Adult
+Disease". In: _Journal of the American College of Nutrition_
+23.2004, pp. 588S-595S. DOI: 10.1080/07315724.2004.10719428.
+
+Belbasis, L, et al. (2016). "Birth weight in relation to health
+and disease in later life: An umbrella review of systematic
+reviews and meta-analyses". In: _BMC Medicine_ 14. DOI:
+10.1186/s12916-016-0692-5.
+
+Ha, S, et al. (2017). "Ambient temperature and early delivery of
+Singleton Pregnancies". In: _Environmental Health Perspectives_
+125.3, pp. 453-459. DOI: 10.1289/EHP97.
+
+Ha, S, et al. (2017). "Ambient temperature and air quality in
+relation to small for gestational age and term low birthweight".
+In: _Environmental Research_ 155, pp. 394-400. DOI:
+10.1016/j.envres.2017.02.021.
+
+Harrison, M. S, et al. (2016). "Global burden of prematurity". In:
+_Seminars in Fetal and Neonatal Medicine_ 21.2, pp. 74-79. DOI:
+10.1016/j.siny.2015.12.007.
+
+Kloog, I, et al. (2014). "A new hybrid spatio-temporal model for
+estimating daily multi-year PM2.5 concentrations across
+northeastern USA using high resolution aerosol optical depth
+data".  95, pp. 581-590. DOI: 10.1016/j.atmosenv.2014.07.014.
+
+Kloog, I, et al. (2015). "Using Satellite-Based Spatiotemporal
+Resolved Air Temperature Exposure to Study the Association between
+Ambient Air Temperature and Birth Outcomes in Massachusetts". In:
+_Environmental Health Perspectives_ 123.10, pp. 1053-1058. DOI:
+10.1289/ehp.1308075.
+
+Kloog, I, et al. (2017). "Modelling spatio-temporally resolved air
+temperature across the complex geo-climate area of France using
+satellite-derived land surface temperature data". In:
+_International Journal of Climatology_ 37.1, pp. 296-304. DOI:
+10.1002/joc.4705.
+
+Liu, L, et al. (2016). "Global, regional, and national causes of
+under-5 mortality in 2000-15: an updated systematic analysis with
+implications for the Sustainable Development Goals". In: _The
+Lancet_ 388, pp. 3027-3035. DOI: 10.1016/S0140-6736(16)31593-8.
+
+McCormick, M. C, et al. (2011). "Prematurity: An Overview and
+Public Health Implications". In: _Annual Review of Public Health_
+32, pp. 367-379. DOI: 10.1146/annurev-publhealth-090810-182459.
+
+Rosenfeld, A, et al. (2017). "Estimating daily minimum, maximum,
+and mean near surface air temperature using hybrid satellite
+models across Israel". In: _Environmental Research_ 159, pp.
+297-312. DOI: 10.1016/j.envres.2017.08.017.
+
+Shi, L, et al. (2016). "Estimating daily air temperature across
+the Southeastern United States using high-resolution satellite
+data: A statistical modeling study". In: _Environmental Research_
+146, pp. 51-58. DOI: 10.1016/j.envres.2015.12.006.
+
+Zhang, Y, et al. (2017). "Temperature exposure during pregnancy
+and birth outcomes: An updated systematic review of
+epidemiological evidence". In: _Environmental Pollution_ 225, pp.
+700-712. DOI: 10.1016/j.envpol.2017.02.066.
+    </textarea>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function() {
+  var d = document, s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})();</script>
+
+<script>
+(function() {
+  var i, text, code, codes = document.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+})();
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
