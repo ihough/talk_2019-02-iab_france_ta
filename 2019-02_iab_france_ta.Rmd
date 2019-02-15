@@ -35,7 +35,7 @@ Ben Gurion University of the Negev
 .logos[![uga-logo](img/uga.png) ![iab-logo](img/iab_coul.png) ![bgu-logo](img/bgu.png)]
 
 ---
-background-image: url(/img/outline-black.png)
+background-image: url(img/outline-black.png)
 
 ```{r, load_refs, echo=FALSE, cache=FALSE}
 library(RefManageR)
@@ -89,12 +89,12 @@ class: inverse center middle
 # How do we estimate T<sub>a</sub> exposure?
 
 ---
-background-image: url(/img/map_stations.jpg)
+background-image: url(img/map_stations.jpg)
 background-size: contain
 class: inverse
 
 ---
-background-image: url(/img/map_stations_zoom.jpg)
+background-image: url(img/map_stations_zoom.jpg)
 background-size: contain
 class: inverse
 
@@ -112,12 +112,12 @@ class: inverse
 # Our T<sub>a</sub> model
 
 * ### Daily minimum, maximum, and mean T<sub>a</sub> 2000 - 2016
-* ### 1 x 1 km<sup>2</sup> for continental France
+* ### 1 x 1 km<sup>2</sup> for continental France<sup>1</sup>
 * ### 200 x 200 m<sup>2</sup> for large urban areas
 
-<br>
-
-Extension of `r Cite(bib, "Kloog2017")` (daily 1 km mean T<sub>a</sub> 2000 - 2011)
+.footnote[
+[1] Extension of `r Cite(bib, "Kloog2017")` (daily 1 km mean T<sub>a</sub> 2000 - 2011)
+]
 
 ---
 
@@ -196,7 +196,7 @@ $$T_{pred} = (\alpha + \mu_{ip}) + (\beta_1 + \nu_{ip}) \cdot T_{IDW} + e$$
 *T<sub>IDW</sub>* = inverse distance weighted T<sub>a</sub>
 
 ---
-background-image: url(/img/map_ta_1km.jpg)
+background-image: url(img/map_ta_1km.jpg)
 background-size: contain
 class: inverse
 
@@ -221,12 +221,12 @@ class: inverse
 \* = not reported
 
 ---
-background-image: url(/img/map_stations_zoom.jpg)
+background-image: url(img/map_stations_zoom.jpg)
 background-size: contain
 class: inverse
 
 ---
-background-image: url(/img/map_ta_1km_zoom.jpg)
+background-image: url(img/map_ta_1km_zoom.jpg)
 background-size: contain
 class: inverse
 
@@ -245,12 +245,12 @@ $$R \sim T_{pred},\ T_{B},\ NDVI,\ Elevation,\ Population,\\Land Cover,\ lat,\ l
 * Weights vary by location and predicted residual
 
 ---
-background-image: url(/img/map_ta_1km_zoom.jpg)
+background-image: url(img/map_ta_1km_zoom.jpg)
 background-size: contain
 class: inverse
 
 ---
-background-image: url(/img/map_ta_200m.jpg)
+background-image: url(img/map_ta_200m.jpg)
 background-size: contain
 class: inverse
 
@@ -282,16 +282,14 @@ class: inverse
 * T<sub>a</sub>, PM, and interaction
 
 ---
-class: inverse bottom center
+class: inverse middle center
 
 # Thanks!
 
-<br><br><br><br>
-
-.left[
+.footnote[.left[
 ### Ian Hough
 ### ian.hough@univ-grenoble-alpes.fr
-]
+]]
 
 ---
 class: inverse references-slide
